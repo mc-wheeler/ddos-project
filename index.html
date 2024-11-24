@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SYN Flood Activity</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        canvas {
+            max-width: 100%;
+            margin: 0 auto;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <h1>SYN Flood Activity Graph</h1>
+    <canvas id="synFloodChart" width="600" height="400"></canvas>
+    
+    <script>
+        const ctx = document.getElementById('synFloodChart').getContext('2d');
+        const synFloodChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: [{
+                    label: 'SYN Packets Sent',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    data: [],
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: {
+                        type: 'linear',
+                        position: 'bottom',
+                        title: {
+                            display: true,
+                            text: 'Time (seconds)'
+                        }
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: 'Packet Count'
+                        },
+                        min: 0
+                    }
+                },
+                animation: {
+                    duration: 0
+                }
+            }
+        });
+
+        function updateGraph() {
+            fetch('/packet_count')
+                .then(response => response.json())
+                .then(data => {
+                    const currentTime = synFloodChart.data.labels.length > 0 
+                        ? synFloodChart.data.labels[synFloodChart.data.labels.length - 1] + 1 
+                        : 0;
+
+                    synFloodChart.data.labels.push(currentTime);
+                    synFloodChart.data.datasets[0].data.push(data.count);
+
+                    if (synFloodChart.data.labels.length > 100) {
+                        synFloodChart.data.labels.shift();
+                        synFloodChart.data.datasets[0].data.shift();
+                    }
+
+                    synFloodChart.update();
+                });
+        }
+
+        setInterval(updateGraph, 1000);
+    </script>
+</body>
+</html>
