@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SYN Flood Activity</title>
+    <link rel="stylesheet" href="../CSS/main.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;  /* Full viewport height */
+            justify-content: center; /* Align elements to the top */
+            align-items: center;
+        }
+        canvas {
+            width: 100%;
+            height: 100%;
+            max-width: 800px;  /* Max width for the canvas */
+            max-height: 600px; /* Max height for the canvas */
+            margin-bottom: 20px;
+        }
+        button {
+            margin: 15px;
+            padding: 15px 30px;
+            width: 400px;  
+            font-size: 16px; 
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        h1 {
+            font-family: 'Fantasy';  
+            font-size: 36px; 
+            font-weight: bold;  
+            color: #333;  
+        }
+        
+    </style>
+</head>
+<body>
+    <h1>SYN Flood Activity Graph</h1>
+    <button id="attackBtn">Start Attack</button>
+    <button id="rateLimitBtn">Enable Rate Limiting</button>
+    <canvas id="synFloodChart" width="600" height="400"></canvas>
+    
+    <script>
+        const ctx = document.getElementById('synFloodChart').getContext('2d');
+        const synFloodChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: [
+                    {
+                        label: 'SYN Packets Sent',
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        data: [],
+                        fill: true
+                    },
+                    {
+                        label: 'Rate Limit Rejections',
+                        borderColor: 'rgba(255, 99, 132, 1)',
+                        backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                        data: [],
+                        fill: true,
+                        borderDash: [5, 5],  // Dotted line for rejection periods
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: {
+                        type: 'linear',
+                        position: 'bottom',
+                        title: { display: true, text: 'Time (seconds)' }
+                    },
+                    y: {
+                        title: { display: true, text: 'Packet Count' },
+                        min: 0
+                    }
+                },
+                animation: { duration: 0 }
+            }
+        });
+
+        function updateGraph() {
+    fetch('/packet_count')
+        .then(response => response.json())
+        .then(data => {
+            const currentTime = synFloodChart.data.labels.length > 0 
+                ? synFloodChart.data.labels[synFloodChart.data.labels.length - 1] + 1 
+                : 0;
+
+            synFloodChart.data.labels.push(currentTime);
+
+            if (data.rejected) {
+                synFloodChart.data.datasets[0].data.push(0);  // Flat line for rejections
+                synFloodChart.data.datasets[1].data.push(1);  // Mark rejection
+            } else {
+                synFloodChart.data.datasets[0].data.push(data.count);
+                synFloodChart.data.datasets[1].data.push(0);  // No rejection
+            }
+
+            if (synFloodChart.data.labels.length > 100) {
+                synFloodChart.data.labels.shift();
+                synFloodChart.data.datasets[0].data.shift();
+                synFloodChart.data.datasets[1].data.shift();
+            }
+
+            synFloodChart.update();
+        });
+}
+        setInterval(updateGraph, 1000);
+
+        // Toggle attack on/off
+        document.getElementById('attackBtn').addEventListener('click', () => {
+            fetch('/toggle-attack', { method: 'POST' })
+                .then(response => response.json())
+                .then(data => {
+                    const button = document.getElementById('attackBtn');
+                    if (data.attackInProgress) {
+                        button.textContent = 'Disable Attack';
+                    } else {
+                        button.textContent = 'Start Attack';
+                    }
+                });
+        });
+
+        // Toggle rate limiting on/off
+        document.getElementById('rateLimitBtn').addEventListener('click', () => {
+            fetch('/toggle-rate-limit', { method: 'POST' })
+                .then(response => response.json())
+                .then(data => {
+                    const button = document.getElementById('rateLimitBtn');
+                    if (data.rateLimitingEnabled) {
+                        button.textContent = 'Disable Rate Limiting';
+                    } else {
+                        button.textContent = 'Enable Rate Limiting';
+                    }
+                });
+        });
+    </script>
+</body>
+</html>
