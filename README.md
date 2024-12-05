@@ -28,11 +28,8 @@ The scapysyn.py script uses several key libraries to simulate a SYN flood attack
 
 
 Responsibilities
-
 Jackson Kueny: Jackson developed the SYN flood program and successfully hosted the site on the school server.
-
 Carson Whitfield: Carson created the server.js file, got the site to a functioning state, and created the presentation.
-
 Matthew Wheeler: Matthew researched the means of implementation, created the index.html file, and the documentation. 
 
 
