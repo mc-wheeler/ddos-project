@@ -16,10 +16,10 @@ Features
   Togglable rate limiting 
 
 
-Objective
+Objective:
 The objective of this project was to provide an in-depth education on Distributed Denial of Service (DDoS) attacks. Detailing their mechanisms, risks, and consequences for online services. This project also aims to educate participants on effective defense strategies such as web application filtering, rate limiting, and using content delivery networks (CDNs). For our site, our goal was to create a website that could graph the activity of a live SYN flood program to showcase the execution of a DDoS attack. 
 
-Tech Summary
+Tech Summary:
 For the backend, Express is used as the core web framework. Express-rate-limit is used to apply rate-limiting functionality, limiting the number of requests a client can make to the server within a specified time window. The path module is used to resolve file paths, allowing the server to serve static files. The server has middleware to enable or disable rate limiting dynamically and also includes functionality to simulate an attack state. Additionally, it includes endpoints to toggle both the rate limiting and attack states. This setup provides an environment for experimenting with rate limiting and simulating attack-like conditions on a web server.
 
 On the frontend, an HTML page creates a user interface for visualizing SYN flood activity and controlling rate limiting and attack simulation on a server. The page uses Chart.js, to dynamically display a line chart that tracks SYN packet counts and rate limit rejections over time. It includes two buttons: one to toggle the attack state and another to enable or disable rate limiting. The chart updates every second by fetching packet count data from the server and adjusting the graph based on whether the attack is active and if rate limiting is in place. This allows for real-time monitoring and control of the simulated SYN flood activity.
